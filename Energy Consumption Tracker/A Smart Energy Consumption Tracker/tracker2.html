@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Energy Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding-bottom: 50px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #e3f2fd;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+
+        .tip-box {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2e7d32;
+            padding: 15px;
+            border-left: 5px solid #2e7d32;
+            background: #e8f5e9;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .chart-container {
+            width: 100%;
+            max-width: 100vw;
+            height: 600px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 90% !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Green Energy Consumption Tracker ⚡</h1>
+
+        <div class="card chart-container">
+            <h2>Energy Consumption (Weekly)</h2>
+            <canvas id="energyChart"></canvas>
+        </div>
+
+        <div class="card">
+            <h2>Energy-Saving Tip 💡</h2>
+            <div class="tip-box" id="tipText"></div>
+            <button onclick="generateTip()">New Tip</button>
+        </div>
+
+        <div class="card">
+            <h2>Leaderboard 🏆</h2>
+            <div id="leaderboard"></div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = 'eDqjEYUfmSVpndlNqAtFBvHYS1PMgrdNk3vuWMxx';
+        const startDate = '2024-03-01';
+        const endDate = '2024-03-10';
+
+        const apiUrl = `https://api.eia.gov/v2/electricity/rto/daily-region-data/data/?api_key=${apiKey}&frequency=daily&data[0]=value&start=${startDate}&end=${endDate}`;
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                console.log("API Response:", data);
+            })
+            .catch(error => console.error("Error fetching data:", error));
+
+
+        async function fetchEnergyData() {
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (!data.response || !data.response.data) {
+                    throw new Error("Invalid API response structure");
+                }
+
+                const energyData = data.response.data.slice(0, 7);
+                const labels = energyData.map(entry => entry.period);
+                const values = energyData.map(entry => entry.value);
+
+                updateChart(labels, values);
+            } catch (error) {
+                console.error("Error fetching energy data:", error);
+            }
+        }
+
+
+
+        function updateChart(labels, values) {
+            const ctx = document.getElementById("energyChart").getContext("2d");
+            new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Energy Consumption (MWh)",
+                        data: values,
+                        borderColor: "#4CAF50",
+                        backgroundColor: "rgba(76, 175, 80, 0.2)",
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+
+        const tips = [
+            "Turn off appliances when not in use.",
+            "Use LED bulbs instead of incandescent.",
+            "Unplug chargers when devices are fully charged.",
+            "Opt for natural light during the day.",
+            "Reduce screen brightness to save power.",
+            "Use smart thermostats for energy efficiency."
+        ];
+
+        function generateTip() {
+            document.getElementById("tipText").innerText = tips[Math.floor(Math.random() * tips.length)];
+        }
+
+        const leaderboardData = [
+            { name: "Alice", savings: "25%" },
+            { name: "Bob", savings: "18%" },
+            { name: "Charlie", savings: "15%" }
+        ];
+
+        function populateLeaderboard() {
+            const leaderboardEl = document.getElementById("leaderboard");
+            leaderboardEl.innerHTML = "";
+            leaderboardData.forEach((user, index) => {
+                const div = document.createElement("div");
+                div.className = "leaderboard-item";
+                div.innerHTML = `<strong>${index + 1}. ${user.name}</strong> <span>${user.savings} Energy Saved</span>`;
+                leaderboardEl.appendChild(div);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            generateTip();
+            populateLeaderboard();
+            fetchEnergyData();
+        });
+    </script>
+</body>
+
+</html>
