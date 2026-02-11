@@ -44,21 +44,6 @@ Built using **HTML, CSS, JavaScript, and Chart.js**, this project demonstrates r
 
 ---
 
-## 📂 Project Structure
-
--Smart-Energy-Dashboard/
--│
--├── index.html → Landing page (Green IT website)
--├── tracker2.html → Energy dashboard page
--├── assets/
--│ ├── css/
--│ ├── js/
--│ └── images/
--└── README.md
-
-
----
-
 ## 🚀 How to Run
 
 ### Option 1 – Simple
